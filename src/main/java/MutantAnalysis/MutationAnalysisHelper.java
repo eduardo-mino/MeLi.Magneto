@@ -9,6 +9,7 @@ public final class MutationAnalysisHelper {
     private int _mutations;
     private String[] _dna;
     private boolean _isValidDna;
+    private boolean _isMutant;
     private int _n;
     final static Logger logger =
             LogManager.getLogger(DynamoDBEnhanced.class.getName());
@@ -60,55 +61,45 @@ public final class MutationAnalysisHelper {
         }
         return false;
     }
-
-    public MutationAnalysisHelper(String[] dna){
-        this._dna = dna;
-        _isValidDna = dna.length>0;
-        _n = dna.length;
-    }
-
-    public boolean IsValidDna() {
-        return _isValidDna;
-    }
-
-    public boolean IsMutant() {
+    private void processADN() {
         int x = 0;
         this._mutations = 0;
-        boolean isMutant = false;
 
-        while(!isMutant && x  < _n){
+        while(!_isMutant && x  < _n){
             int y = 0;
 
             while(y < _n) {
                 if(_dna[y].length() != _n || !IsValidKey(_dna[y].charAt(x))){
                     this._isValidDna = false;
-                    return false;
+                    _isMutant = false;
+                    return;
                 }
-                if(!isMutant){
+                if(!_isMutant){
                     try{
                         //se realizan chequeos en base al caracter en la posición dna[y, x]
                         //chequeo si se puede validar "hacia adelante"
                         if(x < _n -3) {
-                            isMutant = checkForward(x, y, _dna);
+                            _isMutant = checkForward(x, y, _dna);
                             //chequeo si se puede validar "hacia abajo"
-                            if(!isMutant && y < _n -3) {
-                                isMutant = checkDiagFrontDown(x,y,_dna);
+                            if(!_isMutant && y < _n -3) {
+                                _isMutant = checkDiagFrontDown(x,y,_dna);
                             }
 
                             //chequeo si se puede validar hacia arriba
-                            if(!isMutant && y > 3) {
-                                isMutant = checkDiagFrontUp(x,y,_dna);
+                            if(!_isMutant && y > 3) {
+                                _isMutant = checkDiagFrontUp(x,y,_dna);
                             }
                         }
 
                         //chequeo si puedo validar verticalmente hacia abajo
-                        if(!isMutant && y < _n -3) {
-                            isMutant = checkDownward(x,y,_dna);
+                        if(!_isMutant && y < _n -3) {
+                            _isMutant = checkDownward(x,y,_dna);
                         }
                     }
                     catch(ArrayIndexOutOfBoundsException exception){
                         this._isValidDna = false;
-                        return false;
+                        _isMutant = false;
+                        return;
                     }
                     catch(Exception ex) {
                         logger.fatal("An exception occurred: " + ex);
@@ -119,7 +110,21 @@ public final class MutationAnalysisHelper {
             }
             x++;
         }
-        return isMutant;
     }
+
+    public MutationAnalysisHelper(String[] dna){
+        this._dna = dna;
+        _isValidDna = dna.length>0;
+        _n = dna.length;
+
+        processADN();
+    }
+
+    public boolean IsMutant() { return _isMutant;}
+
+    public boolean IsValidDna() {
+        return _isValidDna;
+    }
+
 
 }
