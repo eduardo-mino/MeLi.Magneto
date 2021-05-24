@@ -24,8 +24,9 @@ Cuenta en AWS para:
 - existe una instancia de la aplicación en la url: http://ec2-3-137-157-170.us-east-2.compute.amazonaws.com:8080
 
 los endpoints de la api son:
-POST - /mutant
+
+#### POST - /mutant
 http://ec2-3-137-157-170.us-east-2.compute.amazonaws.com:8080/mutant
 
-GET - /stats
+#### GET - /stats
 http://ec2-3-137-157-170.us-east-2.compute.amazonaws.com:8080/stats
