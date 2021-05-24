@@ -1,11 +1,17 @@
 package MutantAnalysis;
 
+import DynamoDBAccess.DynamoDBEnhanced;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public final class MutationAnalysisHelper {
 
     private int _mutations;
     private String[] _dna;
     private boolean _isValidDna;
     private int _n;
+    final static Logger logger =
+            LogManager.getLogger(DynamoDBEnhanced.class.getName());
 
     private boolean IsMutantDNA(int mutationsCount) {
         return mutationsCount > 1;
@@ -104,9 +110,9 @@ public final class MutationAnalysisHelper {
                         this._isValidDna = false;
                         return false;
                     }
-                    catch(Exception exception){
-                        //log information.
-                        throw exception;
+                    catch(Exception ex) {
+                        logger.fatal("An exception occurred: " + ex);
+                        throw ex;
                     }
                 }
                 y++;

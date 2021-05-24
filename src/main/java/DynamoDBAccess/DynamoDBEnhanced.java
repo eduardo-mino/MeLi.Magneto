@@ -6,6 +6,8 @@ import MutantAnalysis.DNA;
 import MutantAnalysis.DnaStats;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -22,6 +24,8 @@ import org.springframework.stereotype.Component;
 public class DynamoDBEnhanced {
     private DynamoDbClient ddb;
     private DynamoDbEnhancedClient enhancedClient;
+    final static Logger logger =
+            LogManager.getLogger(DynamoDBEnhanced.class.getName());
 
     private final ProvisionedThroughput DEFAULT_PROVISIONED_THROUGHPUT =
             ProvisionedThroughput.builder()
@@ -38,25 +42,36 @@ public class DynamoDBEnhanced {
                             .tags(primaryPartitionKey()))
                     .build();
     public DynamoDBEnhanced(){
-        Region region = Region.US_EAST_2;
-         this.ddb = DynamoDbClient.builder()
-                .region(region)
-                .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
-                .build();
-        this.enhancedClient = DynamoDbEnhancedClient.builder()
-                .dynamoDbClient(ddb)
-                .build();
-
+        try {
+            Region region = Region.US_EAST_2;
+            this.ddb = DynamoDbClient.builder()
+                    .region(region)
+                    .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
+                    .build();
+            this.enhancedClient = DynamoDbEnhancedClient.builder()
+                    .dynamoDbClient(ddb)
+                    .build();
+        }
+        catch(Exception ex) {
+            logger.fatal("An exception occurred: " + ex);
+            throw ex;
+        }
     }
 
     private long GetRecordCount(String table){
-        DynamoDbTable<DnaItems> mappedTable = enhancedClient.table(table, TABLE_SCHEMA);
+        try {
+            DynamoDbTable<DnaItems> mappedTable = enhancedClient.table(table, TABLE_SCHEMA);
 
-        ScanEnhancedRequest scanReq = ScanEnhancedRequest.builder()
-                .build();
+            ScanEnhancedRequest scanReq = ScanEnhancedRequest.builder()
+                    .build();
 
-        long result = mappedTable.scan(scanReq).items().stream().count();
-        return result;
+            long result = mappedTable.scan(scanReq).items().stream().count();
+            return result;
+        }
+        catch(Exception ex){
+            logger.fatal("An exception occurred: " + ex);
+            throw ex;
+        }
     }
 
     // Uses the enhanced client to inject a new post into a DynamoDB table
@@ -78,22 +93,29 @@ public class DynamoDBEnhanced {
 
             mappedTable.putItem(enReq);
 
-        } catch (Exception e) {
-            e.getStackTrace();
+        } catch (Exception ex) {
+            logger.fatal("An exception occurred: " + ex);
+            throw ex;
         }
     }
 
     public DnaStats GetStats(String humans, String mutants){
-        DnaStats stats = new DnaStats();
-        stats.count_mutant_dna = this.GetRecordCount(mutants);
-        stats.count_human_dna = this.GetRecordCount(humans);
-        if(stats.count_human_dna!=0) {
-            stats.ratio = (float) stats.count_mutant_dna / stats.count_human_dna;
-        }
-        else{
-            stats.ratio = 0;
-        }
+        try{
+            DnaStats stats = new DnaStats();
+            stats.count_mutant_dna = this.GetRecordCount(mutants);
+            stats.count_human_dna = this.GetRecordCount(humans);
+            if(stats.count_human_dna!=0) {
+                stats.ratio = (float) stats.count_mutant_dna / stats.count_human_dna;
+            }
+            else{
+                stats.ratio = 0;
+            }
 
-        return stats;
+            return stats;
+        }
+        catch(Exception ex){
+            logger.fatal("An exception occurred: " + ex);
+            throw ex;
+        }
     }
 }
