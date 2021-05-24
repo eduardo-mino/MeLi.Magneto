@@ -87,7 +87,12 @@ public class DynamoDBEnhanced {
         DnaStats stats = new DnaStats();
         stats.count_mutant_dna = this.GetRecordCount(mutants);
         stats.count_human_dna = this.GetRecordCount(humans);
-        stats.ratio = (float)stats.count_mutant_dna / stats.count_human_dna;
+        if(stats.count_human_dna!=0) {
+            stats.ratio = (float) stats.count_mutant_dna / stats.count_human_dna;
+        }
+        else{
+            stats.ratio = 0;
+        }
 
         return stats;
     }
