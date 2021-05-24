@@ -13,7 +13,7 @@ Cuenta en AWS para:
     - AWS_ACCESS_KEY_ID: valor del access key id generado para el usuario de AWS
     - AWS_SECRET_ACCESS_KEY: valor del secret generado para el usuario de AWS
 
-#B#uild del proyecto e instalación
+##Build del proyecto e instalación
 - Ejecutar el comando: "mvn package" en la raíz del proyecto.
 - copiar el archivo rest-service-0.0.1-SNAPSHOT.jar generado en la carpeta target al servidor linux
 - ejecutar el comando java -jar rest-service-0.0.1-SNAPSHOT.jar
